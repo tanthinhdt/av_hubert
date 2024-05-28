@@ -63,6 +63,8 @@ def create_manifest(
         )
         if not os.path.exists(visual_path):
             logging.error(f'File {visual_path} does not exist.')
+            continue
+
         audio_path = os.path.join(
             audio_dir,
             split + '_' + str(sample.shard).zfill(4),
@@ -70,6 +72,7 @@ def create_manifest(
         )
         if not os.path.exists(audio_path):
             logging.error(f'File {audio_path} does not exist.')
+            continue
 
         manifest.append(
             '\t'.join([
@@ -86,6 +89,8 @@ def create_manifest(
         f.write('\n'.join(manifest) + '\n')
     with open(os.path.join(output_dir, f'{split}.wrd'), 'w') as f:
         f.write('\n'.join(texts) + '\n')
+    
+    logging.info(f'{split} set have {len(texts)} sample')
 
 
 def main(args: argparse.Namespace) -> None:
