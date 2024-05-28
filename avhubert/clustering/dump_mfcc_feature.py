@@ -59,7 +59,6 @@ class MfccFeatureReader(object):
 
 def get_path_iterator(tsv, nshard, rank):
     with open(tsv, "r") as f:
-        root = f.readline().rstrip()
         lines = [line.rstrip() for line in f]
         tot = len(lines)
         shard_size = math.ceil(tot / nshard)
@@ -75,7 +74,7 @@ def get_path_iterator(tsv, nshard, rank):
         def iterate():
             for line in lines:
                 _, video_path, wav_path, nsample_video, nsample_wav = line.split("\t")
-                yield f"{root}/{wav_path}", int(nsample_wav)
+                yield f"{wav_path}", int(nsample_wav)
 
         return iterate, len(lines)
 
