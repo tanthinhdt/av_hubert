@@ -45,8 +45,7 @@ def get_args() -> argparse.Namespace:
 def create_manifest(
     split: str,
     split_df: pd.DataFrame,
-    visual_dir: str,
-    audio_dir: str,
+    data_dir: str,
     output_dir: str,
 ) -> None:
     logging.info('Creating manifest...')
@@ -56,20 +55,22 @@ def create_manifest(
     for i, sample in enumerate(split_df.itertuples()):
         logging.info(f'[{i+1}/{len(split_df)}] Processing {sample.id}')
 
-        visual_path = os.path.join(
-            visual_dir,
+        rel_visual_path = os.path.join(
+            'visual',
             split + '_' + str(sample.shard).zfill(4),
             f'{sample.id}.mp4',
         )
+        visual_path = os.path.join(data_dir, rel_visual_path)
         if not os.path.exists(visual_path):
             logging.error(f'File {visual_path} does not exist.')
             continue
 
-        audio_path = os.path.join(
-            audio_dir,
+        rel_audio_path = os.path.join(
+            'audio',
             split + '_' + str(sample.shard).zfill(4),
             f'{sample.id}.wav',
         )
+        audio_path = os.path.join(data_dir, rel_audio_path)
         if not os.path.exists(audio_path):
             logging.error(f'File {audio_path} does not exist.')
             continue
@@ -77,8 +78,8 @@ def create_manifest(
         manifest.append(
             '\t'.join([
                 sample.id,
-                visual_path,
-                audio_path,
+                rel_visual_path,
+                rel_audio_path,
                 str(sample.video_num_frames),
                 str(sample.audio_num_frames),
             ])
@@ -86,6 +87,7 @@ def create_manifest(
         texts.append(sample.transcript)
 
     with open(os.path.join(output_dir, f'{split}.tsv'), 'w') as f:
+        f.write(data_dir + '\n')
         f.write('\n'.join(manifest) + '\n')
     with open(os.path.join(output_dir, f'{split}.wrd'), 'w') as f:
         f.write('\n'.join(texts) + '\n')
@@ -105,14 +107,6 @@ def main(args: argparse.Namespace) -> None:
     if not os.path.exists(metadata_path):
         logging.error(f'File {metadata_path} does not exist.')
         return
-    visual_dir = os.path.join(args.data_dir, 'visual')
-    if not os.path.exists(visual_dir):
-        logging.error(f'Directory {visual_dir} does not exist.')
-        return
-    audio_dir = os.path.join(args.data_dir, 'audio')
-    if not os.path.exists(audio_dir):
-        logging.error(f'Directory {audio_dir} does not exist.')
-        return
     os.makedirs(args.output_dir, exist_ok=True)
 
     split_df = pd.read_parquet(metadata_path)
@@ -121,8 +115,7 @@ def main(args: argparse.Namespace) -> None:
     create_manifest(
         split=args.split,
         split_df=split_df,
-        visual_dir=visual_dir,
-        audio_dir=audio_dir,
+        data_dir=args.data_dir,
         output_dir=args.output_dir,
     )
 
