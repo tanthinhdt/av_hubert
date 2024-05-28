@@ -4,23 +4,14 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-import argparse
-from tempfile import NamedTemporaryFile
-import csv
-from pathlib import Path
-import zipfile
-from functools import reduce
-from multiprocessing import cpu_count
-from typing import Any, Dict, List, Optional, Union
-
-import numpy as np
-# import pandas as pd
 import sentencepiece as sp
+from pathlib import Path
+from typing import List, Optional
+from multiprocessing import cpu_count
 # from fairseq.data.audio.audio_utils import (
 #     _convert_to_mono, _get_kaldi_fbank, _get_torchaudio_fbank
 # )
 # import torch
-from tqdm import tqdm
 
 
 UNK_TOKEN, UNK_TOKEN_ID = "<unk>", 3
@@ -28,9 +19,13 @@ BOS_TOKEN, BOS_TOKEN_ID = "<s>", 0
 EOS_TOKEN, EOS_TOKEN_ID = "</s>", 2
 PAD_TOKEN, PAD_TOKEN_ID = "<pad>", 1
 
+
 def gen_vocab(
-    input_path: Path, output_path_prefix: Path, model_type="bpe",
-    vocab_size=1000, special_symbols: Optional[List[str]] = None
+    input_path: Path,
+    output_path_prefix: Path,
+    model_type="bpe",
+    vocab_size=1000,
+    special_symbols: Optional[List[str]] = None,
 ):
     # Train SentencePiece Model
     arguments = [
