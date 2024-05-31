@@ -55,22 +55,22 @@ def create_manifest(
     for i, sample in enumerate(split_df.itertuples()):
         logging.info(f'[{i+1}/{len(split_df)}] Processing {sample.id}')
 
-        visual_path = os.path.join(
-            data_dir,
+        rel_visual_path = os.path.join(
             'visual',
             split + '_' + str(sample.shard).zfill(4),
             f'{sample.id}.mp4',
         )
+        visual_path = os.path.join(data_dir, rel_visual_path)
         if not os.path.exists(visual_path):
             logging.error(f'File {visual_path} does not exist.')
             continue
 
-        audio_path = os.path.join(
-            data_dir,
+        rel_audio_path = os.path.join(
             'audio',
             split + '_' + str(sample.shard).zfill(4),
             f'{sample.id}.wav',
         )
+        audio_path = os.path.join(data_dir, rel_audio_path)
         if not os.path.exists(audio_path):
             logging.error(f'File {audio_path} does not exist.')
             continue
@@ -78,8 +78,8 @@ def create_manifest(
         manifest.append(
             '\t'.join([
                 sample.id,
-                visual_path,
-                audio_path,
+                rel_visual_path,
+                rel_audio_path,
                 str(sample.video_num_frames),
                 str(sample.audio_num_frames),
             ])
@@ -87,6 +87,7 @@ def create_manifest(
         texts.append(sample.transcript)
 
     with open(os.path.join(output_dir, f'{split}.tsv'), 'w') as f:
+        f.write(data_dir + '\n')
         f.write('\n'.join(manifest) + '\n')
     with open(os.path.join(output_dir, f'{split}.wrd'), 'w') as f:
         f.write('\n'.join(texts) + '\n')
